@@ -1,0 +1,113 @@
+body {
+  background-color: black;
+  color: white;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace;
+}
+
+.header-container {
+  background-color: navy;
+  display: flex;
+  justify-content: space-between;
+}
+
+.subheader-container {
+  display: flex;
+  justify-content: space-between;
+  background-color: rgb(0, 0, 0);
+}
+
+.active-view-container {
+  display: flex;
+}
+
+.active-view-choice-active {
+  color: rgb(0, 255, 0);
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.active-view-choice-active:hover {
+  color: rgb(153, 94, 255);
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.active-view-choice-active:active {
+  color: rgb(191, 155, 253);
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.active-view-choice {
+  color: green;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.active-view-choice:hover {
+  color: rgb(153, 94, 255);
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.active-view-choice:active {
+  color: rgb(191, 155, 253);
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+input[type="search"] {
+  outline: none;
+  width: 25%;
+  /* padding: 0px 10px; */
+  /* margin: 0; */
+  border: none;
+  background-color: navy;
+  color: white;
+}
+
+input[type="search"]::placeholder {
+  color: rgb(255, 255, 255); /* Change the placeholder color */
+  /* opacity: 1; Ensure the opacity is 100% */
+  border: none;
+}
+
+input[type="text"] {
+  outline: none;
+  width: 25%;
+  background-color: black;
+  color: white;
+  border: none;
+}
+
+input[type="text"]::placeholder {
+  color: rgb(255, 255, 255); /* Change the placeholder color */
+  /* opacity: 1; Ensure the opacity is 100% */
+  border: none;
+}
+
+.dropdown {
+  width: 110px;
+}
+
+select {
+  outline: none;
+}
+
+.table-body {
+  user-select: none;
+}
+
+.table-view-and-pagination-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
