@@ -1,5 +1,8 @@
+import { app } from "electron";
+import path from "path";
+
 export const createTables = () => {
-  const db = require("better-sqlite3")("./master.db");
+  const db = require("better-sqlite3")(path.join(app.getPath("userData"), "master.db"));
   try {
     const itemsTable = `CREATE TABLE IF NOT EXISTS items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -8,7 +11,8 @@ export const createTables = () => {
       itemName TEXT,
       itemId INTEGER,
       itemCount INTEGER,
-      itemSlots INTEGER
+      itemSlots INTEGER,
+      fileDate TEXT
     )`;
 
     const eqDirTable = `CREATE TABLE IF NOT EXISTS eqDir (
@@ -49,8 +53,8 @@ export const createTables = () => {
     const eqDirExists = db.prepare("SELECT COUNT(*) AS count FROM eqDir").get();
     if (eqDirExists.count === 0) {
       const insertDefaultEqDir = `INSERT INTO eqDir (eqDir) VALUES (?)`;
-      db.prepare(insertDefaultEqDir).run("c:/r99");
-      console.log("Default eqDir inserted: c:/r99");
+      db.prepare(insertDefaultEqDir).run("");
+      console.log("Default eqDir inserted: ");
     }
   } catch (err) {
     console.error("createTables error:", err);

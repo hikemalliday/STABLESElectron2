@@ -1,5 +1,8 @@
+import { app } from "electron";
+import path from "path";
+
 export const setEqDir = (eqDir) => {
-  const db = require("better-sqlite3")("./master.db");
+  const db = require("better-sqlite3")(path.join(app.getPath("userData"), "master.db"));
   try {
     const preparedQuery = db.prepare(`UPDATE eqDir SET eqDir = ? WHERE id = 1`);
     preparedQuery.run(eqDir);
@@ -12,7 +15,7 @@ export const setEqDir = (eqDir) => {
 };
 
 export const deleteTable = (tableName) => {
-  const db = require("better-sqlite3")("./master.db");
+  const db = require("better-sqlite3")(path.join(app.getPath("userData"), "master.db"));
   const stmt = db.prepare(`DELETE FROM ${tableName}`);
   try {
     stmt.run();
@@ -25,7 +28,7 @@ export const deleteTable = (tableName) => {
 };
 
 export const bulkInsert = (tableName, dataArray) => {
-  const db = require("better-sqlite3")("./master.db");
+  const db = require("better-sqlite3")(path.join(app.getPath("userData"), "master.db"));
   const colNamesQuery = `PRAGMA table_info(${tableName})`;
   const colNames = db
     .prepare(colNamesQuery)

@@ -9,7 +9,6 @@ export const CharactersDropdown = (): JSX.Element => {
   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     setCharName(e.target.value);
     setPage(0);
-    console.log("handleDropdownChange");
   };
   const { data: charNamesData, isLoading } = useCharNames(activeView);
 

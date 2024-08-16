@@ -5,6 +5,8 @@ interface IPaginationContext {
   setPage: React.Dispatch<React.SetStateAction<number>>;
   pageSize: number;
   setPageSize: React.Dispatch<React.SetStateAction<number>>;
+  count: number;
+  setCount: (count: number) => void;
 }
 
 type PaginationContextProviderProps = {
@@ -18,6 +20,7 @@ export const PaginationContextProvider = ({
 }: PaginationContextProviderProps): JSX.Element => {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [count, setCount] = useState(0);
 
   return (
     <PaginationContext.Provider
@@ -26,6 +29,8 @@ export const PaginationContextProvider = ({
         setPage,
         pageSize,
         setPageSize,
+        count,
+        setCount,
       }}
     >
       {children}

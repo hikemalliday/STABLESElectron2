@@ -3,7 +3,8 @@ import cors from "cors";
 import { createTables } from "./tables.js";
 import { setEqDir } from "./dbMutations.js";
 import { getEqDir, getCharNames } from "./dbQueries.js";
-import { Items, MissingSpells, CampOut, YellowText } from "./logic.js";
+import { Items, MissingSpells, CampOut, YellowText } from "./models.js";
+import { testEqDir, testLogsDir } from "./utils.js";
 
 export const backend = () => {
   const app = express();
@@ -28,7 +29,7 @@ export const backend = () => {
     }
   });
 
-  app.get("/get_eq_dir", (req, res) => {
+  app.get("/get_eq_dir", (_, res) => {
     try {
       const eqDir = getEqDir();
       res.send(eqDir);
@@ -46,6 +47,34 @@ export const backend = () => {
     } catch (err) {
       console.log("/set_eq_dir error:", err);
       res.status(400).end();
+    }
+  });
+
+  app.get("/test_eq_dir", (_, res) => {
+    const eqDir = getEqDir();
+    try {
+      const isDirValid = testEqDir(eqDir);
+      if (isDirValid) {
+        res.status(200).end();
+        return;
+      }
+      res.status(400).end();
+    } catch (err) {
+      res.status(500).end();
+    }
+  });
+
+  app.get("/test_logs_dir", (_, res) => {
+    const eqDir = getEqDir();
+    try {
+      const isLogsDirValid = testLogsDir(eqDir);
+      if (isLogsDirValid) {
+        res.status(200).end();
+        return;
+      }
+      res.status(400).end();
+    } catch (err) {
+      res.status(500).end();
     }
   });
 
@@ -92,42 +121,76 @@ export const backend = () => {
     }
   });
 
+  app.get("/parse_items", (_, res) => {
+    try {
+      const eqDir = getEqDir();
+      const ItemsInstance = new Items(eqDir);
+      const isParseSuccessful = ItemsInstance.parseItems();
+      if (isParseSuccessful) {
+        res.status(200).end();
+        return;
+      } else {
+        res.status(500).end();
+      }
+    } catch (err) {
+      console.error("/parse_items_error", err);
+      res.status(500).end();
+    }
+  });
+
+  app.get("/parse_missing_spells", (_, res) => {
+    try {
+      const eqDir = getEqDir();
+      const MissingSpellsInstance = new MissingSpells(eqDir);
+      const isParseSuccessful = MissingSpellsInstance.parseMissingSpells();
+      if (isParseSuccessful) {
+        res.status(200).end();
+        return;
+      } else {
+        res.status(500).end();
+      }
+    } catch (err) {
+      console.error("/parse_missing_spells", err);
+      res.status(500).end();
+    }
+  });
+
+  app.get("/parse_yellow_text", async (_, res) => {
+    try {
+      const eqDir = getEqDir();
+      const YellowTextInstance = new YellowText(eqDir);
+      const isParseSuccessful = await YellowTextInstance.parseYellowText();
+      if (isParseSuccessful) {
+        res.status(200).end();
+        return;
+      } else {
+        res.status(500).end();
+      }
+    } catch (err) {
+      console.error("/parse_yellow_text", err);
+      res.status(500).end();
+    }
+  });
+
+  app.get("/parse_campout", async (_, res) => {
+    try {
+      const eqDir = getEqDir();
+      const CampOutInstance = new CampOut(eqDir);
+      const isParseSuccessful = await CampOutInstance.parseCampOutLocations();
+      if (isParseSuccessful) {
+        res.status(200).end();
+        return;
+      } else {
+        res.status(500).end();
+      }
+    } catch (err) {
+      console.error("/parse_campout", err);
+      res.status(500).end();
+    }
+  });
+
   app.listen(port, async () => {
     console.log(`express app listening on port ${port}`);
     createTables();
-    const eqDir = getEqDir();
-    // const ItemsInstance = new Items(eqDir);
-    // ItemsInstance.parseItems();
-    // ItemsInstance.getItems({
-    //   itemName: "Ring of the Ancients",
-    //   charName: "All",
-    //   page: 0,
-    //   pageSize: 25,
-    // });
-    // console.log(eqDir);
-    // const MissingSpellsInstance = new MissingSpells(eqDir);
-    // MissingSpellsInstance.getMissingSpells({
-    //   page: 1,
-    //   pageSize: 25,
-    //   charName: "Grixus",
-    // });
-    const ItemsInstance = new Items(eqDir);
-    ItemsInstance.parseItems();
-    const MissingSpellsInstance = new MissingSpells(eqDir);
-    MissingSpellsInstance.parseMissingSpells();
-    const YellowTextInstance = new YellowText(eqDir);
-    await YellowTextInstance.parseYellowText();
-    const CampOutInstance = new CampOut(eqDir);
-    await CampOutInstance.parseCampOutLocations();
-    CampOutInstance.getCampOutLocations({
-      page: 1,
-      pageSize: 25,
-      charName: "ALL",
-    });
-    YellowTextInstance.getYellowText({
-      page: 1,
-      pageSize: 25,
-      charName: "ALL",
-    });
   });
 };

@@ -13,6 +13,10 @@ interface IDataQueryContext {
   clearFilters: () => void;
   eqDir: string;
   setEqDir: (eqDir: string) => void;
+  sortBy: string;
+  setSortBy: (col: string) => void;
+  desc: boolean;
+  setDesc: (desc: boolean) => void;
 }
 
 type DataQueryContextProviderProps = {
@@ -29,6 +33,9 @@ export const DataQueryContextProvider = ({
   const [charNames, setCharNames] = useState(["ALL"]);
   const [activeView, setActiveView] = useState("items");
   const [eqDir, setEqDir] = useState("");
+  const [sortBy, setSortBy] = useState("charName");
+  // For backend query params (order by)
+  const [desc, setDesc] = useState(false);
 
   const clearFilters = (): void => {
     setItemName("");
@@ -49,6 +56,10 @@ export const DataQueryContextProvider = ({
         clearFilters,
         eqDir,
         setEqDir,
+        sortBy,
+        setSortBy,
+        desc,
+        setDesc,
       }}
     >
       {children}

@@ -3,17 +3,20 @@ import { MainPage } from "./components/MainPage";
 import { DataQueryContextProvider } from "@renderer/context/useDataQueryContext";
 import { PaginationContextProvider } from "@renderer/context/usePaginationContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ParseContextProvider } from "./context/useParseContext";
 function App(): JSX.Element {
   const queryClient = new QueryClient();
 
   return (
     <>
       <QueryClientProvider client={queryClient}>
-        <PaginationContextProvider>
-          <DataQueryContextProvider>
-            <MainPage />
-          </DataQueryContextProvider>
-        </PaginationContextProvider>
+        <ParseContextProvider>
+          <PaginationContextProvider>
+            <DataQueryContextProvider>
+              <MainPage />
+            </DataQueryContextProvider>
+          </PaginationContextProvider>
+        </ParseContextProvider>
       </QueryClientProvider>
     </>
   );

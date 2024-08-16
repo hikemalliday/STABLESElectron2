@@ -1,10 +1,28 @@
 const fs = require("fs");
+import { getDateTime } from "./utils";
 import { bulkInsert } from "./dbMutations";
 import { spellsMaster } from "./spells/classSpellsMaster";
+import { app } from "electron";
+import path from "path";
 
 export class Items {
   constructor(eqDir) {
     this.eqDir = eqDir;
+    this.itemIds = {
+      19956: "Piece of a medallion (Pained Soul)",
+      19957: "Piece of a medallion (Rotting Skeleton)",
+      19958: "Piece of a medallion (Burnished Wooden Stave)",
+      19959: "Piece of a medallion (A Bloodgill Maurader)",
+      19960: "Piece of a medallion (An Ancient Jarsath)",
+      19961: "Piece of a medallion (Swamp of No Hope)",
+      19962: "Piece of a medallion (Kaesora)",
+      19963: "Piece of a medallion (Verix Kyloxs Remains)",
+      19964: "Piece of a medallion (Chardok)",
+      20863: "Shimmering Pearl (EoV)",
+      28054: "Shimmering Pearl (Ragefire)",
+      28047: "Ornate Sea Shell (#1)",
+      20856: "Ornate Sea Shell (#2)",
+    };
   }
   _getInventoryFilesArray() {
     try {
@@ -27,21 +45,32 @@ export class Items {
       for (let i = 0; i < inventoryFilesArray.length; i++) {
         const path = inventoryFilesArray[i];
         const fileContents = fs.readFileSync(path, "utf-8");
+        // Get the file modified date
+        const dateTimeObj = fs.statSync(path).mtime;
+        const fileDate = getDateTime(dateTimeObj);
         // Split file on new lines
         const lines = fileContents.split(/\r?\n/);
         // First line in inventory file is not needed / wanted
         lines.shift();
-        // Turn each line into array
-        const arrayOfArrays = lines.map((line) => {
+        // Turn each line into array. 2d array of rows
+        const arrayOfRows = lines.map((line) => {
           const charName = path
             .replace("-Inventory.txt", "")
             .replace(this.eqDir, "")
             .replace("/", "");
           const lineArray = line.split("\t");
+          // Check for ambiguous item name
+          const itemId = lineArray[2];
+          if (itemId in this.itemIds) {
+            // Set ambiguous item name
+            lineArray[1] = this.itemIds[itemId];
+          }
+
           lineArray.unshift(charName);
+          lineArray.push(fileDate);
           return lineArray;
         });
-        results.push(arrayOfArrays);
+        results.push(arrayOfRows);
       }
       return results.flat();
     } catch (err) {
@@ -69,25 +98,34 @@ export class Items {
       }
 
       bulkInsert("items", processedInventoryFiles);
+      // Return boolean for parse status handling on the frontend
+      return true;
     } catch (err) {
       throw new Error(`parseItems error: ${err.message}`);
     }
   }
 
   getItems(params) {
-    const db = require("better-sqlite3")("./master.db");
+    const db = require("better-sqlite3")(path.join(app.getPath("userData"), "master.db"));
     const pageSize = params["pageSize"] || 100;
     const page = params["page"] || 0;
     const offset = page * pageSize;
     const itemName = params["itemName"] || "";
     const charName = params["charName"] || "All";
+    const orderBy = params["sortBy"] || "charName";
+    const desc = params["desc"] || false;
 
     let itemQueryParams = [`%${itemName}%`];
     let countQueryParams = [`%${itemName}%`];
 
-    let baseQuery = `SELECT charName, itemName, itemLocation, itemId, itemCount FROM items WHERE itemName LIKE ?`;
+    let baseQuery = `SELECT charName, itemName, itemLocation, itemId, itemCount, fileDate FROM items WHERE itemName LIKE ? ORDER BY ${orderBy}`;
     let paginationQuery = ` LIMIT ? OFFSET ?`;
-    let countQuery = `SELECT COUNT(*) FROM items WHERE itemName LIKE ?`;
+    let countQuery = `SELECT COUNT(*) FROM items WHERE itemName LIKE ? ORDER BY ${orderBy}`;
+
+    if (desc == "true") {
+      baseQuery += ` DESC`;
+      countQuery += ` DESC`;
+    }
 
     if (charName !== "All" && charName !== "ALL" && charName !== "") {
       baseQuery += ` AND charName = ?`;
@@ -108,6 +146,7 @@ export class Items {
         count: count["COUNT(*)"],
         results,
       };
+
       return resultsObject;
     } catch (err) {
       throw new Error(`getItems error: ${err.message}`);
@@ -240,36 +279,46 @@ export class MissingSpells {
       const missingSpells = this._determineMissingSpells(processedSpellFiles, charClassArray);
 
       bulkInsert("missingSpells", missingSpells);
+      // Return boolean for parse status handling on the frontend
+      return true;
     } catch (err) {
       throw new Error(`parseMissingSpells error: ${err.message}`);
     }
   }
 
   getMissingSpells(params) {
-    const db = require("better-sqlite3")("./master.db");
-    const page = params["page"] || 1;
+    const db = require("better-sqlite3")(path.join(app.getPath("userData"), "master.db"));
+    const page = params["page"] || 0;
     const pageSize = params["pageSize"] || 25;
     const charName = params["charName"] || "ALL";
+    const desc = params["desc"] || false;
+    const orderBy = params["sortBy"] || "charName";
 
     const paramsArray = [];
     const countQueryParams = [];
 
     let baseQuery = `SELECT charName, spellName, level FROM missingSpells`;
-    const filtersQuery = ` WHERE charName = ?`;
+    let filtersQuery = ` WHERE charName = ?`;
+    let orderByQuery = ` ORDER BY ${orderBy}`;
     let countQuery = `SELECT COUNT(*) FROM missingSpells`;
     const paginationQuery = ` LIMIT ? OFFSET ?`;
+
+    if (desc == "true") {
+      orderByQuery += ` DESC`;
+    }
 
     if (charName !== "ALL") {
       baseQuery = baseQuery + filtersQuery;
       countQuery += filtersQuery;
+      countQuery += orderByQuery;
       paramsArray.push(charName);
       countQueryParams.push(charName);
     }
 
     paramsArray.push(pageSize);
-    paramsArray.push((page - 1) * pageSize);
+    paramsArray.push(page * pageSize);
 
-    const finalQuery = baseQuery + paginationQuery;
+    const finalQuery = baseQuery + orderByQuery + paginationQuery;
 
     try {
       const results = db.prepare(finalQuery).all(...paramsArray);
@@ -380,6 +429,8 @@ export class CampOut {
       const logFilesArray = this._getLogFilesArray();
       const rows = await this._processLogFiles(logFilesArray);
       bulkInsert("campOut", rows);
+      // Return boolean for parse status on frontend
+      return true;
     } catch (err) {
       console.error(`parseCampOutLocation error: ${err.message}`);
     }
@@ -388,30 +439,38 @@ export class CampOut {
   }
 
   getCampOutLocations(params) {
-    const db = require("better-sqlite3")("./master.db");
-    const page = params["page"] || 1;
+    const db = require("better-sqlite3")(path.join(app.getPath("userData"), "master.db"));
+    const page = params["page"] || 0;
     const pageSize = params["pageSize"] || 25;
     const charName = params["charName"] || "ALL";
+    const desc = params["desc"] || false;
+    const orderBy = params["sortBy"] || "charName";
 
     const paramsArray = [];
     const countQueryParams = [];
 
     let baseQuery = `SELECT charName, zone, timeStamp FROM campOut`;
-    const filtersQuery = ` WHERE charName = ?`;
+    let filtersQuery = ` WHERE charName = ?`;
+    let orderByQuery = ` ORDER BY ${orderBy}`;
     let countQuery = `SELECT COUNT(*) FROM campOut `;
     const paginationQuery = ` LIMIT ? OFFSET ?`;
+
+    if (desc == "true") {
+      orderByQuery += ` DESC`;
+    }
 
     if (charName !== "ALL") {
       baseQuery = baseQuery + filtersQuery;
       countQuery += `WHERE charName = ?`;
+      countQuery += orderByQuery;
       paramsArray.push(charName);
       countQueryParams.push(charName);
     }
 
     paramsArray.push(pageSize);
-    paramsArray.push((page - 1) * pageSize);
+    paramsArray.push(page * pageSize);
 
-    const finalQuery = baseQuery + paginationQuery;
+    const finalQuery = baseQuery + orderByQuery + paginationQuery;
 
     try {
       const results = db.prepare(finalQuery).all(...paramsArray);
@@ -524,37 +583,46 @@ export class YellowText {
       const logFilesArray = this._getLogFilesArray();
       const rows = await this._processLogFiles(logFilesArray);
       bulkInsert("yellowText", rows);
+      // Return boolean for parse status on frontend
+      return true;
     } catch (err) {
       console.error(`parseYellowText error: ${err.message}`);
     }
   }
 
   getYellowText(params) {
-    const db = require("better-sqlite3")("./master.db");
-    const page = params["page"] || 1;
+    const db = require("better-sqlite3")(path.join(app.getPath("userData"), "master.db"));
+    const page = params["page"] || 0;
     const pageSize = params["pageSize"] || 25;
-    // save charName as 'killer', so we dont have to complicated frontend logic
     const charName = params["charName"] || "ALL";
+    const desc = params["desc"] || false;
+    const orderBy = params["sortBy"] || "charName";
 
     const paramsArray = [];
     const countQueryParams = [];
 
     let baseQuery = `SELECT charName, victim, zone, timeStamp FROM yellowText`;
-    const filtersQuery = ` WHERE charName = ?`;
+    let filtersQuery = ` WHERE charName = ?`;
+    let orderByQuery = ` ORDER BY ${orderBy}`;
     let countQuery = `SELECT COUNT(*) FROM yellowText`;
     const paginationQuery = ` LIMIT ? OFFSET ?`;
+
+    if (desc == "true") {
+      orderByQuery += ` DESC`;
+    }
 
     if (charName !== "ALL") {
       baseQuery = baseQuery + filtersQuery;
       countQuery += filtersQuery;
+      countQuery += orderByQuery;
       paramsArray.push(charName);
       countQueryParams.push(charName);
     }
 
     paramsArray.push(pageSize);
-    paramsArray.push((page - 1) * pageSize);
+    paramsArray.push(page * pageSize);
 
-    const finalQuery = baseQuery + paginationQuery;
+    const finalQuery = baseQuery + orderByQuery + paginationQuery;
 
     try {
       const results = db.prepare(finalQuery).all(...paramsArray);

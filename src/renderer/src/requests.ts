@@ -13,6 +13,8 @@ export interface IGetDataArgs {
   charName: string;
   activeView: string;
   pageSize: number;
+  sortBy: string;
+  desc: boolean;
 }
 
 export interface IPaginatedResponse {
@@ -20,10 +22,15 @@ export interface IPaginatedResponse {
   results: object[];
 }
 
+interface IParseResponse {
+  passed: boolean;
+  message: string;
+}
+
 const BASE_URL = "http://127.0.0.1:3000";
 
 export const useData = (args: IGetDataArgs): UseQueryResult<IPaginatedResponse> => {
-  const { page, itemName, charName, activeView } = args;
+  const { page, itemName, charName, activeView, sortBy, desc } = args;
   let endpoint = "";
   switch (activeView) {
     case "missingSpells":
@@ -40,7 +47,7 @@ export const useData = (args: IGetDataArgs): UseQueryResult<IPaginatedResponse> 
   }
 
   return useQuery({
-    queryKey: [page, itemName, charName, activeView],
+    queryKey: [page, itemName, charName, activeView, sortBy, desc],
     queryFn: async () => {
       const resp = await axios.get(BASE_URL + endpoint, { params: args });
       return resp.data;
@@ -81,4 +88,124 @@ export const useEqDirMutation = (): UseMutationResult<void, AxiosError, string> 
       queryCLient.invalidateQueries({ queryKey: ["eqDir"] });
     },
   });
+};
+
+export const testEqDir = async (): Promise<IParseResponse> => {
+  const returnObject = { message: "", passed: false };
+  const failMessage =
+    "Could not read eq dir, please make sure you have provided the correct eq dir. Aborting all parses.";
+  try {
+    const resp = await axios.get(BASE_URL + "/test_eq_dir");
+    if (resp.status === 200) {
+      returnObject.message = "Provided directory exists.";
+      returnObject.passed = true;
+      return returnObject;
+    } else {
+      returnObject.message = failMessage;
+      return returnObject;
+    }
+  } catch (err) {
+    returnObject.message = failMessage;
+    return returnObject;
+  }
+};
+
+export const parseItems = async (): Promise<IParseResponse> => {
+  const returnObject = { message: "", passed: false };
+  const failMessage =
+    "Items parse failed, please make sure you have provided the correct eq dir. Aborting parses: items, missing spells, yellow text, camp out locations.";
+  try {
+    const resp = await axios.get(BASE_URL + "/parse_items");
+    if (resp.status === 200) {
+      returnObject.message = "Items parse successful.";
+      returnObject.passed = true;
+      return returnObject;
+    } else {
+      returnObject.message = failMessage;
+      return returnObject;
+    }
+  } catch (err) {
+    returnObject.message = failMessage;
+    return returnObject;
+  }
+};
+
+export const parseMissingSpells = async (): Promise<IParseResponse> => {
+  const returnObject = { message: "", passed: false };
+  const failMessage =
+    "Missing spells parse failed, please make sure you have provided the correct eq dir. Aborting parses: missing spells, yellow text, camp out locations.";
+  try {
+    const resp = await axios.get(BASE_URL + "/parse_missing_spells");
+    if (resp.status === 200) {
+      returnObject.message = "Missing spells parse successful.";
+      returnObject.passed = true;
+      return returnObject;
+    } else {
+      returnObject.message = failMessage;
+      return returnObject;
+    }
+  } catch (err) {
+    returnObject.message = failMessage;
+    return returnObject;
+  }
+};
+
+export const testLogsDir = async (): Promise<IParseResponse> => {
+  const returnObject = { message: "", passed: false };
+  const failMessage =
+    "Could not read logs dir, please make sure you have provided the correct eq dir. Aborting parses: yellow text, camp out locations.";
+  try {
+    const resp = await axios.get(BASE_URL + "/test_logs_dir");
+    if (resp.status === 200) {
+      returnObject.message = "Logs dir exists.";
+      returnObject.passed = true;
+      return returnObject;
+    } else {
+      returnObject.message = failMessage;
+      return returnObject;
+    }
+  } catch (err) {
+    returnObject.message = failMessage;
+    return returnObject;
+  }
+};
+
+export const parseYellowText = async (): Promise<IParseResponse> => {
+  const returnObject = { message: "", passed: false };
+  const failMessage =
+    "Yellow text parse failed, please make sure you have provided the correct eq dir. Aborting parses: yellow text, camp out locations";
+  try {
+    const resp = await axios.get(BASE_URL + "/parse_yellow_text");
+    if (resp.status === 200) {
+      returnObject.message = "Yellow text parse successful.";
+      returnObject.passed = true;
+      return returnObject;
+    } else {
+      returnObject.message = failMessage;
+      return returnObject;
+    }
+  } catch (err) {
+    returnObject.message = failMessage;
+    return returnObject;
+  }
+};
+
+export const parseCampOut = async (): Promise<IParseResponse> => {
+  const returnObject = { message: "", passed: false };
+  const failMessage =
+    "Camp out locations parse failed, please make sure you have provided the correct eq dir. Aborting parse: camp out locations.";
+  try {
+    const resp = await axios.get(BASE_URL + "/parse_campout");
+    if (resp.status === 200) {
+      returnObject.message = "Camp out locations parse successful.";
+      returnObject.passed = true;
+      return returnObject;
+    } else {
+      returnObject.message = failMessage;
+      return returnObject;
+    }
+  } catch (err) {
+    returnObject.message = failMessage;
+    return returnObject;
+  }
 };

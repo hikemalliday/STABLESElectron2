@@ -1,5 +1,8 @@
+import { app } from "electron";
+import path from "path";
+
 export const getEqDir = () => {
-  const db = require("better-sqlite3")("./master.db");
+  const db = require("better-sqlite3")(path.join(app.getPath("userData"), "master.db"));
   try {
     const query = `SELECT eqDir FROM eqDir WHERE id = 1`;
     const row = db.prepare(query).get();
@@ -13,7 +16,7 @@ export const getEqDir = () => {
 };
 
 export const getCharNames = (activeView) => {
-  const db = require("better-sqlite3")("./master.db");
+  const db = require("better-sqlite3")(path.join(app.getPath("userData"), "master.db"));
   try {
     const query = `SELECT DISTINCT charName FROM ${activeView}`;
     const names = db.prepare(query).all();

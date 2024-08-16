@@ -12,7 +12,7 @@ body {
 }
 
 .header-container {
-  background-color: navy;
+  background-color: rgb(0, 0, 99);
   display: flex;
   justify-content: space-between;
 }
@@ -28,86 +28,156 @@ body {
 }
 
 .active-view-choice-active {
+  user-select: none;
   color: rgb(0, 255, 0);
   margin-left: 10px;
   cursor: pointer;
 }
 
 .active-view-choice-active:hover {
-  color: rgb(153, 94, 255);
+  user-select: none;
+  color: rgb(39, 219, 39);
   margin-left: 10px;
   cursor: pointer;
 }
 
 .active-view-choice-active:active {
-  color: rgb(191, 155, 253);
+  user-select: none;
+  color: white;
   margin-left: 10px;
   cursor: pointer;
 }
 
 .active-view-choice {
+  user-select: none;
   color: green;
   margin-left: 10px;
   cursor: pointer;
 }
 
 .active-view-choice:hover {
-  color: rgb(153, 94, 255);
+  user-select: none;
+  color: rgb(39, 219, 39);
   margin-left: 10px;
   cursor: pointer;
 }
 
 .active-view-choice:active {
-  color: rgb(191, 155, 253);
+  color: white;
   margin-left: 10px;
   cursor: pointer;
 }
 
-input[type="search"] {
+.eq-dir {
   outline: none;
   width: 25%;
-  /* padding: 0px 10px; */
-  /* margin: 0; */
   border: none;
-  background-color: navy;
+  background-color: rgb(17, 17, 17);
   color: white;
 }
 
-input[type="search"]::placeholder {
-  color: rgb(255, 255, 255); /* Change the placeholder color */
-  /* opacity: 1; Ensure the opacity is 100% */
-  border: none;
-}
-
-input[type="text"] {
+.eq-dir-confirmation {
   outline: none;
   width: 25%;
-  background-color: black;
-  color: white;
   border: none;
+  background-color: rgb(17, 17, 17);
+  color: white;
+  user-select: none;
+  animation: fadeOutText 3s forwards;
 }
 
-input[type="text"]::placeholder {
-  color: rgb(255, 255, 255); /* Change the placeholder color */
-  /* opacity: 1; Ensure the opacity is 100% */
+@keyframes fadeOutText {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.search-bar {
+  outline: none;
+  width: 25%;
   border: none;
+  background-color: rgb(4, 4, 74);
+  color: white;
+}
+.eq-dir::placeholder {
+  color: white; /* Set to match the input text color or desired color */
+}
+
+.search-bar::placeholder {
+  color: white; /* Set to match the input text color or desired color */
 }
 
 .dropdown {
   width: 110px;
 }
 
+.back-button {
+  user-select: none;
+  margin-top: 2px;
+  background-color: black;
+  color: white;
+}
+
+.parse-button {
+  user-select: none;
+  background-color: rgb(13, 13, 107);
+  color: white;
+  margin-right: 2px;
+}
+
 select {
   outline: none;
+}
+
+.table-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .table-body {
   user-select: none;
 }
 
-.table-view-and-pagination-wrapper {
+.table-cell {
+  padding-left: 11px;
+  padding-right: 11px;
+}
+
+.table-cell-charname {
+  color: rgba(255, 255, 255, 0.926);
+}
+
+.pagination-container {
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+}
+
+.loading-div {
+  display: flex;
+  flex-direction: center;
+  justify-content: center;
+}
+
+.dropdown-and-button-container {
+  display: flex;
+}
+
+.error-div {
+  color: red;
+}
+
+.success-div {
+  color: rgb(0, 255, 0);
+}
+
+.no-results-div {
+  display: flex;
+  justify-content: center;
+  align-content: center;
 }
