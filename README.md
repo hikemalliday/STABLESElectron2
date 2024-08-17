@@ -1,34 +1,11 @@
 # stableselectron2
 
-An Electron application with React and TypeScript
+Re-factor of StableElectron. Much more performant, removed feature bloat, and the code base is much nicer, meaning I'll be able to open it up a year from now and understand what is going on.
 
-## Recommended IDE Setup
+Vintage UI look / feel for this iteration. Used html + css for most components this round, rather than relying on MUI. I did however use MUI for the left and right page buttons, though.
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+Download link:
 
-## Project Setup
+https://drive.google.com/file/d/1iGcitOsTNiDHUDmwnSphv2UBu9TQpFfh/view?usp=sharing
 
-### Install
-
-```bash
-$ npm install
-```
-
-### Development
-
-```bash
-$ npm run dev
-```
-
-### Build
-
-```bash
-# For windows
-$ npm run build:win
-
-# For macOS
-$ npm run build:mac
-
-# For Linux
-$ npm run build:linux
-```
+Or, if you are tech savy, just clone the repo and install deps, run in dev mode (`npm run dev`) or build with `electron-builder`.
