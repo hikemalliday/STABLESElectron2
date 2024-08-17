@@ -6,7 +6,7 @@ Built with express api + reactJS (typescript). Requests are handled and cached w
 
 The `campOut` and `yellowText` parses are dealt with by using `fs.readFileStream`, because these log files can scale upwards of 50mb+, we dont want to simply open them at once into memory (fs.readFileSync, for example).
 
-Vintage UI look / feel for this iteration. Used html + css for most components this round, rather than relying on MUI. I did however use MUI for the left and right page buttons, though.
+Vintage UI look / feel for this iteration. Used html + css for most components this round, rather than relying on MUI. I did however use MUI for the left and right page buttons.
 
 Download link:
 
