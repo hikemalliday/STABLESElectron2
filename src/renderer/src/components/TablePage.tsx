@@ -1,6 +1,6 @@
 import { TableView } from "./TableView";
 import { PaginationController } from "./PaginationController";
-import { IPaginatedResponse, useData } from "@renderer/requests";
+import { IPaginatedResponse, useCharNames, useData } from "@renderer/requests";
 import { useDataQueryContext } from "@renderer/context/useDataQueryContext";
 import { usePaginationContext } from "@renderer/context/usePaginationContext";
 import { RenderParseStatus } from "./RenderParseStatus";
@@ -10,7 +10,12 @@ export const TablePage = (): JSX.Element => {
   const { itemName, charName, activeView, sortBy, desc } = useDataQueryContext();
   const { page, setPage, pageSize } = usePaginationContext();
   const { parseStatus } = useParseContext();
-  const { data, isLoading, refetch } = useData({
+  const { refetch: refetchCharNames } = useCharNames("items");
+  const {
+    data,
+    isLoading,
+    refetch: refetchData,
+  } = useData({
     page,
     itemName,
     charName,
@@ -20,9 +25,14 @@ export const TablePage = (): JSX.Element => {
     desc,
   });
 
+  const handleRefetch = (): void => {
+    refetchData();
+    refetchCharNames();
+  };
+
   if (parseStatus.length > 0) {
     // prop is for calling Items query after click 'back' button in parse view
-    return <RenderParseStatus refetch={refetch} />;
+    return <RenderParseStatus refetch={handleRefetch} />;
   }
 
   if (isLoading) {

@@ -13,10 +13,6 @@ export const backend = () => {
   app.use(cors());
   app.use(express.json());
 
-  app.get("/", (req, res) => {
-    res.send("Hello World!");
-  });
-
   app.get("/get_items", (req, res) => {
     try {
       const eqDir = getEqDir();

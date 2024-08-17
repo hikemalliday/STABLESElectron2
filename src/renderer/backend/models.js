@@ -118,18 +118,19 @@ export class Items {
     let itemQueryParams = [`%${itemName}%`];
     let countQueryParams = [`%${itemName}%`];
 
-    let baseQuery = `SELECT charName, itemName, itemLocation, itemId, itemCount, fileDate FROM items WHERE itemName LIKE ? ORDER BY ${orderBy}`;
+    let baseQuery = `SELECT charName, itemName, itemLocation, itemId, itemCount, fileDate FROM items WHERE itemName LIKE ?`;
+    let orderByQuery = ` ORDER BY ${orderBy}`;
+    const charNameQuery = ` AND charName = ?`;
     let paginationQuery = ` LIMIT ? OFFSET ?`;
-    let countQuery = `SELECT COUNT(*) FROM items WHERE itemName LIKE ? ORDER BY ${orderBy}`;
+    let countQuery = `SELECT COUNT(*) FROM items WHERE itemName LIKE ?`;
 
     if (desc == "true") {
-      baseQuery += ` DESC`;
-      countQuery += ` DESC`;
+      orderByQuery += ` DESC`;
     }
 
     if (charName !== "All" && charName !== "ALL" && charName !== "") {
-      baseQuery += ` AND charName = ?`;
-      countQuery += ` AND charName = ?`;
+      baseQuery += charNameQuery;
+      countQuery += charNameQuery;
       itemQueryParams.push(charName);
       countQueryParams.push(charName);
     }
@@ -137,7 +138,8 @@ export class Items {
     itemQueryParams.push(pageSize);
     itemQueryParams.push(offset);
 
-    const finalQuery = baseQuery + paginationQuery;
+    const finalQuery = baseQuery + orderByQuery + paginationQuery;
+
     try {
       const results = db.prepare(finalQuery).all(...itemQueryParams);
       const count = db.prepare(countQuery).get(...countQueryParams);
@@ -499,7 +501,9 @@ export class YellowText {
       const path = fs.readdirSync(`${this.eqDir}/logs/`);
       const regex = /^eqlog_.*_P1999PVP\.txt$/;
       const logFiles = path.filter((file) => regex.test(file));
-      return logFiles.map((file) => `${this.eqDir}/logs/${file}`);
+      const filteredLogFiles = logFiles.map((file) => `${this.eqDir}/logs/${file}`);
+      // for (const file of filteredLogFiles) console.log(file);
+      return filteredLogFiles;
     } catch (err) {
       throw new Error(`_getLogFilesArray error: ${err.message}`);
     }
@@ -521,7 +525,6 @@ export class YellowText {
           return;
         }
 
-        const charName = charNameMatch[1];
         const readableStream = fs.createReadStream(file, {
           encoding: "utf8",
           highWaterMark: 50000,
@@ -535,14 +538,15 @@ export class YellowText {
           leftover = lines.pop();
           lines.forEach((line) => {
             line = line.trim();
+
             if (yellowTextRegex.test(line)) {
               const match = line.match(yellowTextRegex);
               if (match) {
                 const timeStamp = match[1];
                 const victim = match[2];
-                const killer = match[3];
+                const charName = match[3];
                 const zone = match[4];
-                matches.push([killer, victim, zone, timeStamp]);
+                matches.push([charName, victim, zone, timeStamp]);
               }
             }
           });
@@ -552,14 +556,21 @@ export class YellowText {
           if (leftover && yellowTextRegex.test(leftover)) {
             const match = leftover.match(yellowTextRegex);
             if (match) {
+              console.log(match);
               const timeStamp = match[1];
-              const zone = match[2];
-              matches.push([charName, zone, timeStamp]);
+              const victim = match[2];
+              const charName = match[3];
+              const zone = match[4];
+              matches.push([charName, victim, zone, timeStamp]);
+            }
+          }
+          // Push YT's onto results
+          for (const row of matches) {
+            if (row !== undefined) {
+              results.push(row);
             }
           }
 
-          const row = matches.pop();
-          if (row !== undefined) results.push(row);
           resolve();
         });
 
@@ -582,6 +593,7 @@ export class YellowText {
     try {
       const logFilesArray = this._getLogFilesArray();
       const rows = await this._processLogFiles(logFilesArray);
+
       bulkInsert("yellowText", rows);
       // Return boolean for parse status on frontend
       return true;

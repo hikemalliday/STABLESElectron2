@@ -12,7 +12,26 @@ export const CharactersDropdown = (): JSX.Element => {
   };
   const { data: charNamesData, isLoading } = useCharNames(activeView);
 
-  if (isLoading === true) return <>LOADING...</>;
+  // Prevents toggling through dropdown select with left and right keys. We only want this behavior for pagination
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLSelectElement>): void => {
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+    }
+  };
+
+  if (isLoading === true)
+    return (
+      <select
+        name="characters-dropdown"
+        id="dropdown"
+        className="dropdown"
+        value={charName}
+        onChange={handleDropdownChange}
+        onKeyDown={handleKeyDown}
+      >
+        <option>{"ALL"}</option>
+      </select>
+    );
 
   return (
     <select
@@ -21,9 +40,10 @@ export const CharactersDropdown = (): JSX.Element => {
       className="dropdown"
       value={charName}
       onChange={handleDropdownChange}
+      onKeyDown={handleKeyDown}
     >
       {charNamesData !== undefined
-        ? charNamesData?.map((char, i) => {
+        ? charNamesData?.sort().map((char, i) => {
             return <option key={i}>{char}</option>;
           })
         : ""}
