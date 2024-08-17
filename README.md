@@ -2,7 +2,7 @@
 
 Re-factor of StablesElectron. Much more performant, removed feature bloat, and the code base is much nicer, meaning I'll be able to open it up a year from now and understand what is going on.
 
-Built with express api + reactJS (typescript). Requests are handling and cached with `react-query`. Pagination is hanlded via query params + sqlite (`OFFSET + LIMIT`). `react-query` is a great addition because now queries are cached on the frontend, which pairs well with toggling back and forth through pages.
+Built with express api + reactJS (typescript). Requests are handled and cached with `react-query`. Pagination is hanlded via query params + sqlite (`OFFSET + LIMIT`). `react-query` is a great addition because now queries are cached on the frontend, which pairs well with toggling back and forth through pages.
 
 The `campOut` and `yellowText` parses are dealt with by using `fs.readFileStream`, because these log files can scale upwards of 50mb+, we dont want to simply open them at once into memory (fs.readFileSync, for example).
 
