@@ -1,6 +1,6 @@
 # stableselectron2
 
-Re-factor of StableElectron. Much more performant, removed feature bloat, and the code base is much nicer, meaning I'll be able to open it up a year from now and understand what is going on.
+Re-factor of StablesElectron. Much more performant, removed feature bloat, and the code base is much nicer, meaning I'll be able to open it up a year from now and understand what is going on.
 
 Vintage UI look / feel for this iteration. Used html + css for most components this round, rather than relying on MUI. I did however use MUI for the left and right page buttons, though.
 
