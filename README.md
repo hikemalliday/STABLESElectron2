@@ -1,6 +1,6 @@
 # stableselectron2
 
-Re-factor of StablesElectron. Much more performant, removed feature bloat, and the code base is much nicer, meaning I'll be able to open it up a year from now and understand what is going on.
+Re-factor of StablesElectron. Much more performant, removed feature bloat, and the code is so clean that you could eat off it it.
 
 Built with express api + reactJS (typescript). Requests are handled and cached with `react-query`. Pagination is hanlded via query params + sqlite (`OFFSET + LIMIT`). `react-query` is a great addition because now queries are cached on the frontend, which pairs well with toggling back and forth through pages.
 
